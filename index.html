@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Stress Level Prediction</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2ff;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+            color: #334155;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid #93c5fd;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 25px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            font-size: 17px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        #result {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Student Stress Level Prediction</h1>
+    <p class="subtitle">
+        Machine Learning Prediction System
+    </p>
+
+    <form id="predictionForm">
+
+        <div class="grid">
+
+            <div>
+                <label>Student ID</label>
+                <input type="number" id="student_id" required>
+            </div>
+
+            <div>
+                <label>Age</label>
+                <input type="number" id="age" required>
+            </div>
+
+            <div>
+                <label>Gender</label>
+                <select id="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="0">Female</option>
+                    <option value="1">Male</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Gaming Hours</label>
+                <input type="number" id="gaming_hours"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Study Hours</label>
+                <input type="number" id="study_hours"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Sleep Hours</label>
+                <input type="number" id="sleep_hours"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Attendance (%)</label>
+                <input type="number" id="attendance"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Gaming Genre</label>
+                <select id="gaming_genre" required>
+                    <option value="">Select Genre</option>
+                    <option value="0">Casual</option>
+                    <option value="1">FPS</option>
+                    <option value="2">RPG</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Social Activity</label>
+                <input type="number" id="social_activity"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Device Usage</label>
+                <input type="number" id="device_usage"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Reaction Time (ms)</label>
+                <input type="number" id="reaction_time_ms"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Addiction Score</label>
+                <input type="number" id="addiction_score"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Grades</label>
+                <input type="number" id="grades"
+                       step="any" required>
+            </div>
+
+            <div>
+                <label>Genre Label</label>
+                <input type="number" id="genre_label" required>
+            </div>
+
+        </div>
+
+        <button type="submit" id="predictButton">
+            Predict Stress Level
+        </button>
+
+    </form>
+
+    <div id="result" role="status"></div>
+
+</div>
+
+<script>
+    const form = document.getElementById("predictionForm");
+    const result = document.getElementById("result");
+    const button = document.getElementById("predictButton");
+
+    const featureColumns = [
+        "student_id",
+        "age",
+        "gender",
+        "gaming_hours",
+        "study_hours",
+        "sleep_hours",
+        "attendance",
+        "gaming_genre",
+        "social_activity",
+        "device_usage",
+        "reaction_time_ms",
+        "addiction_score",
+        "grades",
+        "genre_label"
+    ];
+
+    form.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const data = {};
+
+        for (const column of featureColumns) {
+            data[column] = Number(
+                document.getElementById(column).value
+            );
+        }
+
+        button.disabled = true;
+        result.style.color = "#2563eb";
+        result.textContent = "Predicting...";
+
+        try {
+            const response = await fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            const contentType =
+                response.headers.get("content-type") || "";
+
+            if (!contentType.includes("application/json")) {
+                throw new Error(
+                    "Server returned HTML instead of JSON. " +
+                    "Check your Flask terminal."
+                );
+            }
+
+            const output = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    output.error || "Prediction failed"
+                );
+            }
+
+            result.style.color = "#16a34a";
+            result.textContent =
+                "Predicted Stress Level: " +
+                output.stress_level;
+
+        } catch (error) {
+            result.style.color = "#dc2626";
+            result.textContent =
+                "Error: " + error.message;
+
+        } finally {
+            button.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
